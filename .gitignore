@@ -27,10 +27,13 @@ eqn=paste("DV~",paste(q,collapse="+"))
 Model=glm(eqn,family="binomial",data=final_data)
 summary(Model)
 #Variable selection(Backward selection)
-VS=step(Model)
+VS=step(Model,selection="backward")
 IV1=final_data[,c(2,4:6,10)]
 q1=names(IV1)
 eqn1=paste("DV~",paste(q1,collapse="+"))
 Model1=glm(eqn1,family="binomial",data=final_data)
 summary(Model1)
+
+
+
 
