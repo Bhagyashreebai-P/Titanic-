@@ -1,49 +1,32 @@
-####################################################################
-#Importing Raw data
-raw_data=read.csv("D:\\Kaggle\\titanic\\train.csv",header=TRUE)
-raw_data
-
-#Data Cleaning
-##Replacement with NA
-NAdata=read.csv("D:\\Kaggle\\titanic\\train.csv",header=TRUE,na.strings=c(""))
-NAdata
-
-#No of missing values in each column
+#TITANIC DATA##
+#OBJECTIVE: which passengers survived : 0:not survived(dead) 1:survived
+data=read.csv("D:\\Kaggle-Competitions\\train.csv",header=TRUE)
+head(data)
+pacman::p_load(mice)
+#Missing value treatment
+NAdata=read.csv("D:\\Kaggle-Competitions\\train.csv",header=TRUE,na.string=c(""))
+#find out number of missing value
 sapply(NAdata,function(x) sum(is.na(x)))
-
-#removing missing observation-row
-fidata1=NAdata[!is.na(NAdata$Embarked),]
-
-#replacing missing value with median age
-fidata1$Age[is.na(fidata1$Age)]<-median(fidata1$Age,na.rm=TRUE)
-
-#subsetting final data-after exploring
-final_data=fidata1[,c(2:10,12)]
-
-#check for missing values
+#___________________________MISSING VALUE TREATMENT____________________#
+#subsetting data 
+#removing the missing embarked data(2 rows) & removing unwanted columns
+fi=NAdata[!is.na(NAdata$Embarked),]
+head(fi)
+final_data=fi[,c(2,3,5,6,7,8,12)]
+head(final_data)
 sapply(final_data,function(x) sum(is.na(x)))
-names(final_data)
+#uNIVARIATE ANALYSIS
+#Plotting boxplot Pclass against Age , keeping survived as a factor
+ggplot(final_data,aes(x=as.factor(Pclass),y=Age,fill=factor(Survived),colour=factor(Survived)))+geom_boxplot(outlier.colour="black")+xlab("Pclass")+ylab("Age") 
+#conclusion
+#Plotting boxplot SEX against Age , keeping survived as a factor
+ggplot(final_data,aes(x=as.factor(Sex),y=Age,fill=factor(Survived),colour=factor(Survived)))+geom_boxplot(outlier.colour="black")+xlab("Sex")+ylab("Age") 
+#conculsion
+#imputation of missing value using mice package - method=pmm
 
-# Splitting of data into train and test
-train_data=final_data[1:floor(nrow(final_data)*3/4),]
-validation_data=final_data[(floor(nrow(final_data)*3/4)+1):(nrow(final_data)),]
-names(train_data)
-
-#Model building
-IV=train_data[,c(2,4:7,10)]
-q=names(IV)
-DV=train_data$Survived
-eqn=paste("DV~",paste(q,collapse="+"))
-
-#logistic Regression
-#install.packages("car")
-Model=glm(eqn,family="binomial",data=train_data)
-summary(Model)
-
-#Variable selection(Backward selection)
-VS=step(Model,selection="backward")
-IV1=train_data[,c(2,4:6)]
-q1=names(IV1)
-eqn1=paste("DV~",paste(q1,collapse="+"))
-Model1=glm(eqn1,family="binomial",data=train_data)
-summary(Model1)
+#tempData <- mice(final_data,m=5,maxit=50,meth='pmm',seed=500)
+#summary(tempData)
+#cmpdata=complete(tempData,4)
+#hist(cmpdata$Age)
+final_data$Age[is.na(final_data$Age)]<-median(final_data$Age,na.rm=TRUE)
+hist(final_data$Age)
